@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+
+    <title>cyj webgl</title>
+    <script type="text/javascript" src="lib/webgl-utils.js"></script>
+    <script type="text/javascript" src="lib/MV.js"></script>
+    <script type="text/javascript" src="lib/InitShaders.js"></script>
+	<script type="text/javascript" src="lib/three.js"></script>
+	<script type="text/javascript" src="lib/OBJLoader.js"></script>
+	<script type="text/javascript" src="lib/OrbitControls.js"></script>
+    <script type="text/javascript" src="cat.js"></script>
+
+
+    <!-- -->
+    <!-- -->
+    <!-- Phong Shader -->
+    <!-- -->
+    <!-- -->
+
+    <script id="vertex-shader-phong" type="x-shader/x-vertex">
+
+            attribute vec4 a_Position;
+            attribute vec3 a_Normal;
+
+            uniform mat4 u_Projection;
+            uniform mat4 u_ViewMatrix;
+            uniform mat4 u_ModelMatrix;
+
+            varying vec3 v_Position;
+            varying vec3 v_Normal;
+            varying vec3 v_LightPosition;
+            varying vec3 v_Color;
+
+
+            void main(){
+
+                gl_Position = u_Projection * u_ViewMatrix * u_ModelMatrix * a_Position;
+
+                v_LightPosition = (u_ViewMatrix * vec4(2.0, -3.0, 2.0, 1.0)).xyz;
+                v_Position = (u_ViewMatrix * u_ModelMatrix * a_Position).xyz;
+                v_Normal = mat3(u_ViewMatrix * u_ModelMatrix) * a_Normal;
+                v_Color = abs(a_Normal);
+
+
+            }
+        </script>
+
+        <script id="fragment-shader-phong" type="x-shader/x-fragment">
+            precision mediump float;
+
+            varying vec3 v_Position;
+            varying vec3 v_Normal;
+            varying vec3 v_LightPosition;
+            varying vec3 v_Color;
+
+            vec3 L, N, V, H, P;
+            vec3 ambient, diffuse, specular;
+            void main(){
+                vec3 light_ambient = vec3(0.8, 0.5, 0.8);
+                vec3 light_diffuse = vec3(0.6, 0.4, 0.6);
+                vec3 light_specular = vec3(0.8, 0.8, 0.8);
+                float shininess = 2.0;
+
+
+                P = v_Position;
+
+                N = normalize(v_Normal);
+                L = normalize(v_LightPosition - P);
+                V = normalize( -P);
+                H = normalize(L+V);
+
+
+                ambient = v_Color * light_ambient;
+                diffuse = v_Color * max(dot(L, N), 0.0)* light_diffuse;
+                specular = max(v_Color * pow(max(dot(N, H), 0.0), shininess) * light_specular, 0.0) ;
+
+
+                gl_FragColor = vec4(ambient + diffuse + specular, 1.0);
+
+
+            }
+        </script>
+
+    <!-- End Shaders -->
+
+</head>
+
+<body>
+    <h1>cyj的可爱的小猫</h1>
+    <canvas id="gl-canvas" width="800" height="600" style="border:1px solid black">
+        If you see this, you need a better browser
+    </canvas>
+	<p> </p>
+	<button id = "Button0">沿x轴平移</button>
+	<button id = "Button1">沿y轴平移</button>
+	<button id = "Button2">沿z轴平移</button>
+	<p> </p>
+	<button id = "Button3">x轴旋转</button>
+	<button id = "Button4">y轴旋转</button>
+	<button id = "Button5">z轴旋转</button>
+	<p> </p>
+	<button id = "Button6">放大</button>
+	<button id = "Button7">缩小</button>
+
+</body>
+</html>
